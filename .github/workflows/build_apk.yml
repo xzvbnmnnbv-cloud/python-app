@@ -30,17 +30,22 @@ jobs:
           pip install --upgrade pip
           pip install buildozer cython flet yt-dlp
 
-      - name: 📦 Install Android SDK in Buildozer path
+      - name: 📦 Install Android SDK & Fix sdkmanager path
         run: |
-          mkdir -p $HOME/.buildozer/android/platform/android-sdk/cmdline-tools
-          cd $HOME/.buildozer/android/platform/android-sdk/cmdline-tools
+          SDK_DIR=$HOME/.buildozer/android/platform/android-sdk
+          mkdir -p $SDK_DIR/cmdline-tools
+          cd $SDK_DIR/cmdline-tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
           unzip cmdline-tools.zip
           rm cmdline-tools.zip
           mkdir latest
           mv cmdline-tools/* latest/
-          yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-          yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          # عمل رابط رمزي للمسار القديم اللي Buildozer بيستخدمه
+          mkdir -p $SDK_DIR/tools
+          ln -s $SDK_DIR/cmdline-tools/latest $SDK_DIR/tools
+          # تثبيت الأدوات المطلوبة
+          yes | $SDK_DIR/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK_DIR "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+          yes | $SDK_DIR/cmdline-tools/latest/bin/sdkmanager --licenses
 
       - name: 📦 Build APK
         run: buildozer -v android debug

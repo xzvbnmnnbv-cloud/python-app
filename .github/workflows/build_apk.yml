@@ -47,16 +47,6 @@ jobs:
           echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
           echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
 
-      - name: 🛠 Initialize Buildozer
-        run: buildozer init
-
-      - name: ⚙️ Update buildozer.spec
-        run: |
-          sed -i 's/^package.name = .*/package.name = VideoDownloader/' buildozer.spec
-          sed -i 's/^package.domain = .*/package.domain = org.example/' buildozer.spec
-          sed -i 's/^requirements =.*/requirements = python3,flet,yt-dlp/' buildozer.spec
-          sed -i 's/^# android.permissions = INTERNET.*/android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE/' buildozer.spec
-
       - name: 📦 Build APK
         run: buildozer -v android debug
 

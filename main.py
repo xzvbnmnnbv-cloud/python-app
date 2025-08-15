@@ -5,12 +5,15 @@ import os
 
 
 def main(page: ft.Page):
-    page.title = "Video Downloader"
+    page.title = "برنامج تحميل الفيديو"
     page.window_width = 450
     page.window_height = 350
     page.theme_mode = ft.ThemeMode.DARK
 
-    save_path = os.path.expanduser("~")
+    # مسار الحفظ الافتراضي (داخل مجلد التنزيلات)
+    default_path = os.path.join(os.path.expanduser("~"), "Download")
+    if not os.path.exists(default_path):
+        default_path = os.path.expanduser("~")
 
     link_input = ft.TextField(label="رابط الفيديو", width=400)
     quality_dropdown = ft.Dropdown(
@@ -23,18 +26,9 @@ def main(page: ft.Page):
         value="best",
         width=400
     )
-    folder_input = ft.TextField(
-        label="مسار الحفظ", value=save_path, width=400
-    )
+    folder_input = ft.TextField(label="مسار الحفظ", value=default_path, width=400)
     status_text = ft.Text(value="", color="yellow")
     progress = ft.ProgressBar(width=400, visible=False)
-
-    def choose_folder(e):
-        try:
-            dlg = ft.FilePicker(on_result=lambda res: folder_input.value = res.path)
-        except:
-            status_text.value = "ميزة اختيار المجلد غير مدعومة هنا"
-            page.update()
 
     def download_video(e):
         url = link_input.value.strip()
@@ -42,7 +36,7 @@ def main(page: ft.Page):
         folder = folder_input.value.strip()
 
         if not url:
-            status_text.value = "⚠️ يرجى إدخال رابط"
+            status_text.value = "⚠️ يرجى إدخال رابط الفيديو"
             page.update()
             return
         if not os.path.exists(folder):

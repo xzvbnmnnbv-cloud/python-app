@@ -1,9 +1,12 @@
-name: Build APK
+name: Build and Release APK
 
 on:
   push:
     branches:
       - main
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -11,19 +14,22 @@ jobs:
 
     steps:
       - name: 🛎️ Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🐍 Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      - name: 📦 Install dependencies
+      - name: 📦 Install system dependencies
         run: |
           sudo apt update
           sudo apt install -y python3-pip build-essential libffi-dev \
             libssl-dev libsqlite3-dev zlib1g-dev libjpeg-dev \
             openjdk-17-jdk unzip wget
+
+      - name: 📦 Install Python dependencies
+        run: |
           pip install --upgrade pip
           pip install buildozer cython flet yt-dlp
 
@@ -54,8 +60,11 @@ jobs:
       - name: 📦 Build APK
         run: buildozer -v android debug
 
-      - name: 📤 Upload APK
-        uses: actions/upload-artifact@v4
+      - name: 📤 Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: app-apk
-          path: bin/*.apk
+          files: bin/*.apk
+          tag_name: v${{ github.run_number }}
+          name: "APK Build ${{ github.run_number }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
